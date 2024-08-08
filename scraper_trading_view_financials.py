@@ -262,6 +262,31 @@ def get_page_data(symbol: str, journal_idx: int, period_idx: int):
     print(f"[FAILED] Failed to open page {url}\n")
     return None
   
+
+def check_valid_df(df: pd.DataFrame):
+  cols = df.columns.tolist()
+  # Remove "symbol" and "date" columns from checking
+  cols.remove("symbol")
+  cols.remove("date")
+
+  THRESHOLD = len(cols) // 2
+  data_length = len(df)
+  none_columns_count = 0
+
+  print(df)
+  for col in cols:
+    none_count = df[col].isna().sum()
+    print(col, none_count, data_length)
+    # If none_count == data_length, the column will be registered as a "none_column"
+    if (none_count == data_length):
+      none_columns_count +=1
+  
+  # If None columns greater than threshold, then the df is not valid
+  if (none_columns_count >= THRESHOLD):
+    return False
+  else:
+    return True
+  
 def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
   filename = f"financials_annual_P{process}.csv" if period_idx == 0 else f"financials_quarter_P{process}.csv"  
   final_df = pd.DataFrame()
@@ -272,9 +297,30 @@ def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
     if (".JK" in symbol):
       symbol = symbol.replace(".JK", "")
 
+    # Check consecutively, give 3 attemps to get
+    attempt_count = 1
     is_data = get_page_data(symbol, 0, period_idx)
+    while (is_data is not None and not check_valid_df(is_data) and attempt_count <= 3):
+      # Ignore if it is None. None => the data is not available
+      is_data = get_page_data(symbol, 0, period_idx)
+      print(f"[PROGRESS] The {symbol} Income Statement data is invalid on attempt {attempt_count}.")
+      attempt_count += 1
+
+    attempt_count = 1
     bs_data = get_page_data(symbol, 1, period_idx)
+    while (bs_data is not None and not check_valid_df(bs_data) and attempt_count <= 3):
+      # Ignore if it is None. None => the data is not available
+      bs_data = get_page_data(symbol, 1, period_idx)
+      print(f"[PROGRESS] The {symbol} Balance Sheet data is invalid on attempt {attempt_count}.")
+      attempt_count += 1
+
+    attempt_count = 1 
     cf_data = get_page_data(symbol, 2, period_idx)
+    while (cf_data is not None and not check_valid_df(cf_data) and attempt_count <= 3):
+      # Ignore if it is None. None => the data is not available
+      cf_data = get_page_data(symbol, 2, period_idx)
+      print(f"[PROGRESS] The {symbol} Cash Flow data is invalid on attempt {attempt_count}.")
+      attempt_count += 1
     
 
     if (is_data is not None and bs_data is not None and cf_data is not None):
@@ -299,10 +345,5 @@ def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
   final_df.to_csv(os.path.join(DATA_DIR, filename), index=False)
   print(f"[CHECKPOINT] P{process} have finished scraping the data")
 
-# if __name__ == "__main__":
-#   temp_dict = get_page_data('NICE', 0, 1)
-#   for k, v in temp_dict.items():
-#     print(k)
-#     print(v)
   
 
