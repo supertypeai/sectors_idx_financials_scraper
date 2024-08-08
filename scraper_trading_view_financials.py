@@ -263,9 +263,10 @@ def get_page_data(symbol: str, journal_idx: int, period_idx: int):
     return None
   
 def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
+  filename = f"financials_annual_P{process}.csv" if period_idx == 0 else f"financials_quarter_P{process}.csv"  
   final_df = pd.DataFrame()
-
   success_count = 0
+  count = 1
   for symbol in symbol_list:
     # Adjusting
     if (".JK" in symbol):
@@ -274,6 +275,7 @@ def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
     is_data = get_page_data(symbol, 0, period_idx)
     bs_data = get_page_data(symbol, 1, period_idx)
     cf_data = get_page_data(symbol, 2, period_idx)
+    
 
     if (is_data is not None and bs_data is not None and cf_data is not None):
       temp_df = pd.merge(is_data, bs_data, on=['symbol', 'date'], how='inner')
@@ -287,10 +289,15 @@ def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
       success_count += 1
     else:
         print(f"[FAILED] One or more page of {symbol} cannot be scrapped\n")
+    
+    if (count % 40 == 0):
+      final_df.to_csv(os.path.join(DATA_DIR, filename), index=False)
+      print(f"[CHECKPOINT] P{process} have reached {count} data")
+    count +=1
+    time.sleep(1)
           
-  filename = f"financials_annual_P{process}.csv" if period_idx == 0 else f"financials_quarter_P{process}.csv"  
   final_df.to_csv(os.path.join(DATA_DIR, filename), index=False)
-
+  print(f"[CHECKPOINT] P{process} have finished scraping the data")
 
 # if __name__ == "__main__":
 #   temp_dict = get_page_data('NICE', 0, 1)

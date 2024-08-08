@@ -92,42 +92,47 @@ DATA_DIR = os.path.join(os.getcwd(), "data")
 
 if __name__ == "__main__":
 
-  # Read running argument
-  if (sys.argv[1] == None):
-    period_idx = 0
-  else:
-    period_idx = 1
-    # Valid args [0 = annual, 1 = quarter]
+  try:
+    # Read running argument
+    if (sys.argv[1] == None):
+      period_idx = 0
+    else:
+      period_idx = int(sys.argv[1])
+      # Valid args [0 = annual, 1 = quarter]
 
-  df = pd.read_csv(os.path.join(DATA_DIR, "need_search.csv"))
-  symbol_list = df['symbol'].tolist()
+    if (period_idx == 0 or period_idx == 1):
+      df = pd.read_csv(os.path.join(DATA_DIR, "need_search.csv"))
+      symbol_list = df['symbol'].tolist()
 
-  symbol_list = symbol_list[:8]
-  length_list = len(symbol_list)
-  i1 = int(length_list / 4)
-  i2 = 2 * i1
-  i3 = 3 * i1
+      length_list = len(symbol_list)
+      i1 = int(length_list / 4)
+      i2 = 2 * i1
+      i3 = 3 * i1
 
-  start = time.time()
+      start = time.time()
 
-  p1 = Process(target=iterate_scrape, args=(symbol_list[:i1], 1, period_idx))
-  p2 = Process(target=iterate_scrape, args=(symbol_list[i1:i2], 2, period_idx))
-  p3 = Process(target=iterate_scrape, args=(symbol_list[i2:i3], 3, period_idx))
-  p4 = Process(target=iterate_scrape, args=(symbol_list[i3:], 4, period_idx))
+      p1 = Process(target=iterate_scrape, args=(symbol_list[:i1], 1, period_idx))
+      p2 = Process(target=iterate_scrape, args=(symbol_list[i1:i2], 2, period_idx))
+      p3 = Process(target=iterate_scrape, args=(symbol_list[i2:i3], 3, period_idx))
+      p4 = Process(target=iterate_scrape, args=(symbol_list[i3:], 4, period_idx))
 
-  p1.start()
-  p2.start()
-  p3.start()
-  p4.start()
+      p1.start()
+      p2.start()
+      p3.start()
+      p4.start()
 
-  p1.join()
-  p2.join()
-  p3.join()
-  p4.join()
+      p1.join()
+      p2.join()
+      p3.join()
+      p4.join()
 
-  end = time.time()
-  duration = int(end-start)
-  print(f"[FINISHED] The execution time: {time.strftime('%H:%M:%S', time.gmtime(duration))}")
+      end = time.time()
+      duration = int(end-start)
+      print(f"[FINISHED] The execution time: {time.strftime('%H:%M:%S', time.gmtime(duration))}")
+    else:
+      print(f"[ERROR] False argument detected")
+  except Exception as e:
+    print(f"[ERROR] Failed to run the program: {e}")
 
   
 
