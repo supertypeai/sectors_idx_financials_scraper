@@ -2,8 +2,8 @@ name: Scrape IDX Financials Annual Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 15 1 *' # “At 00:00 on day-of-month 15 in January.”
-    - cron: '0 0 15 3 *' # “At 00:00 on day-of-month 15 in March.”
+    - cron: '0 8 15 1 *' # “At 8 am on day-of-month 15 in January.”
+    - cron: '0 8 15 3 *' # “At 8 am on day-of-month 15 in March.”
 
 jobs:
   build:
