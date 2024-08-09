@@ -5,6 +5,7 @@ import time
 import os
 import logging
 import pandas as pd
+import numpy as np
 
 # Set the logging level for the 'websockets' logger
 logging.getLogger('websockets').setLevel(logging.WARNING)
@@ -344,6 +345,57 @@ def iterate_scrape(symbol_list: list, process: int, period_idx : int = 0):
           
   final_df.to_csv(os.path.join(DATA_DIR, filename), index=False)
   print(f"[CHECKPOINT] P{process} have finished scraping the data")
+
+
+def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+  cols = df.columns.tolist()
+  # Remove "symbol" and "date" columns from checking
+  cols.remove("symbol")
+  cols.remove("date")
+
+  column_length = len(cols)
+  index_to_remove = list()
+  for index, row in df.iterrows():
+    none_column_count = 0
+    for col in cols:
+      if (row[col] is None or np.isnan(row[col])):
+        none_column_count += 1
+    # If all columns in a row is None, then the data is not needed
+    if (none_column_count == column_length):
+      index_to_remove.append(index)
+  
+  res_df = df.drop(index_to_remove, axis=0)
+  return res_df
+
+    
+
+
+def combine_data(period_idx: int = 0) -> pd.DataFrame:
+  if (period_idx == 0):
+    data_file_path = [os.path.join(DATA_DIR,f'financials_annual_P{i}.csv') for i in range(1,5)]
+  else: # period_idx == 1
+    data_file_path = [os.path.join(DATA_DIR,f'financials_quarter_P{i}.csv') for i in range(1,5)]
+
+  # Combine data
+  combine_df = pd.DataFrame()
+  for i in range (len(data_file_path)):
+    file_path = data_file_path[i]
+    process_df = pd.read_csv(file_path)
+    if (i == 0):
+      combine_df = process_df
+    else:
+      combine_df = pd.concat([combine_df, process_df], ignore_index = True)
+
+  # Clean data from None Rows
+  clean_df = clean_dataframe(combine_df)
+
+  # Replace mp.nan to None
+  final_df = clean_df.replace({np.nan: None})
+  filename = os.path.join(DATA_DIR, f"combined_financials_annual.csv") if period_idx == 0 else os.path.join(DATA_DIR, f"combined_financials_quarter.csv")
+  final_df.to_csv(os.path.join(DATA_DIR, filename), index=False)
+
+  return final_df
+  
 
   
 

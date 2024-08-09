@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import time
 from multiprocessing import Process
-from scraper_trading_view_financials import make_url, iterate_scrape
+from scraper_trading_view_financials import make_url, iterate_scrape, combine_data
 
 
 DATA_DIR = os.path.join(os.getcwd(), "data")
@@ -111,20 +111,22 @@ if __name__ == "__main__":
 
       start = time.time()
 
-      p1 = Process(target=iterate_scrape, args=(symbol_list[:i1], 1, period_idx))
-      p2 = Process(target=iterate_scrape, args=(symbol_list[i1:i2], 2, period_idx))
-      p3 = Process(target=iterate_scrape, args=(symbol_list[i2:i3], 3, period_idx))
-      p4 = Process(target=iterate_scrape, args=(symbol_list[i3:], 4, period_idx))
+      # p1 = Process(target=iterate_scrape, args=(symbol_list[:i1], 1, period_idx))
+      # p2 = Process(target=iterate_scrape, args=(symbol_list[i1:i2], 2, period_idx))
+      # p3 = Process(target=iterate_scrape, args=(symbol_list[i2:i3], 3, period_idx))
+      # p4 = Process(target=iterate_scrape, args=(symbol_list[i3:], 4, period_idx))
 
-      p1.start()
-      p2.start()
-      p3.start()
-      p4.start()
+      # p1.start()
+      # p2.start()
+      # p3.start()
+      # p4.start()
 
-      p1.join()
-      p2.join()
-      p3.join()
-      p4.join()
+      # p1.join()
+      # p2.join()
+      # p3.join()
+      # p4.join()
+
+      df = combine_data(period_idx)
 
       end = time.time()
       duration = int(end-start)

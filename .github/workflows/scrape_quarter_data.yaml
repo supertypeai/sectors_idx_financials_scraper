@@ -2,7 +2,8 @@ name: Scrape IDX Financials Quarter Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 10 15 */3 *' # “At 00:00 on day-of-month 15 in every 3rd month.”
+    - cron: '0 10 15 3,6,9,12 *' # “At 10:00 on day-of-month 15 in March, June, September, and December.”
+    - cron: '0 10 15 1,4,7,10 *' # “At 10:00 on day-of-month 15 in January, April, July, and October.”
 
 jobs:
   build:
