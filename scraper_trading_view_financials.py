@@ -367,9 +367,6 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
   res_df = df.drop(index_to_remove, axis=0)
   return res_df
 
-    
-
-
 def combine_data(period_idx: int = 0) -> pd.DataFrame:
   if (period_idx == 0):
     data_file_path = [os.path.join(DATA_DIR,f'financials_annual_P{i}.csv') for i in range(1,5)]
