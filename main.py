@@ -19,19 +19,10 @@ if __name__ == "__main__":
   supabase = create_client(url_supabase, key)
 
   # Get the table
-  db_data_MS = supabase.table("idx_financials_annual").select("symbol").eq("source", 3).execute()
+  db_data_MS = supabase.table("idx_active_company_profile").select("symbol").in_("current_source", [-1, 2, 3]).execute()
   df_db_data = pd.DataFrame(db_data_MS.data)
   symbol_list : list = df_db_data['symbol'].unique().tolist()
   print(f"[DATABASE] Get {len(symbol_list)} data from database")
-
-  df_need_search = pd.read_csv(os.path.join(DATA_DIR, "need_search.csv"))
-  temp_symbol_list = df_need_search['symbol'].unique().tolist()
-
-  for symbol in temp_symbol_list:
-    if (symbol not in symbol_list):
-      symbol_list.append(symbol)
-
-  print(f"[DATA] There are {len(symbol_list)} data to be scrapped")
 
   try:
     # Read running argument
