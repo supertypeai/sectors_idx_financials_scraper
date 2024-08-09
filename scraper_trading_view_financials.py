@@ -274,10 +274,8 @@ def check_valid_df(df: pd.DataFrame):
   data_length = len(df)
   none_columns_count = 0
 
-  print(df)
   for col in cols:
     none_count = df[col].isna().sum()
-    print(col, none_count, data_length)
     # If none_count == data_length, the column will be registered as a "none_column"
     if (none_count == data_length):
       none_columns_count +=1
